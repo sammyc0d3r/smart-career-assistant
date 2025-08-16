@@ -180,10 +180,23 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        const errorMessage = Array.isArray(errorData.detail)
-          ? errorData.detail.map(err => err.msg).join('\n')
-          : errorData.detail || 'Registration failed';
+        let errorMessage = 'Registration failed';
+        try {
+          const errorData = await response.json();
+          errorMessage = Array.isArray(errorData.detail)
+            ? errorData.detail.map(err => err.msg).join('\n')
+            : errorData.detail || errorMessage;
+        } catch {
+          // Response might not be JSON (e.g. 500 HTML/error text)
+          const text = await response.text();
+          if (text) errorMessage = text;
+        }
+
+        // Provide a cleaner message for common database constraint errors
+        if (/duplicate key value/i.test(errorMessage) || /already exists/i.test(errorMessage)) {
+          errorMessage = 'Username already exists';
+        }
+
         throw new Error(errorMessage);
       }
 
