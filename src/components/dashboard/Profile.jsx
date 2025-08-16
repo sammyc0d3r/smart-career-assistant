@@ -3,7 +3,7 @@ import { useAuth } from '../AuthContext';
 import CareerFieldSelect from '../CareerFieldSelect';
 
 const Profile = () => {
-  const { user, token, fetchProfile, fetchJobs } = useAuth();
+  const { user, token, fetchProfile, fetchJobs, logout } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     username: user?.username || '',
@@ -98,6 +98,7 @@ const Profile = () => {
       setSuccess('Profile updated successfully!');
       setIsEditing(false);
     } catch (err) {
+      console.error(err);
       setError('Failed to update profile. Please try again.');
     } finally {
       setLoading(false);

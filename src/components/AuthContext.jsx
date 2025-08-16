@@ -189,7 +189,7 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
       
       // Handle new response format
-      const { user: userData, access_token, token_type } = data;
+      const { user: userData, access_token } = data;
       
       // Set authentication state
       setToken(access_token);

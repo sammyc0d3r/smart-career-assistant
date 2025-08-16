@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../components/AuthContext';
 
 // Theme presets
 const THEME_PRESETS = {
@@ -41,7 +40,6 @@ const THEME_PRESETS = {
 };
 
 const Settings = () => {
-  const { user } = useAuth();
   const [theme, setTheme] = useState(() => {
     const savedTheme = localStorage.getItem('dashboard_theme');
     return savedTheme ? JSON.parse(savedTheme) : THEME_PRESETS.default;
@@ -212,4 +210,4 @@ const Settings = () => {
   );
 };
 
-export default Settings; 
+export default Settings;

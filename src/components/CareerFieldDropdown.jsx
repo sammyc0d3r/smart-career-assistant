@@ -84,6 +84,9 @@ const CareerFieldDropdown = ({ onFieldSelect }) => {
   );
 
   const handleFieldSelect = (field) => {
+    if (onFieldSelect) {
+      onFieldSelect(field);
+    }
     if (isAuthenticated && user) {
       navigate('/dashboard', { state: { selectedField: field } });
     } else {
