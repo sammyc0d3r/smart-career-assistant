@@ -44,6 +44,7 @@ const storage = {
 
 const AuthContext = createContext(null);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -160,7 +161,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Login error:', error);
       throw error;
     }
-  }, []);
+  }, [fetchProfile]);
 
   const register = useCallback(async (username, email, password, field, technicalSkillsPercentage) => {
     try {
@@ -189,7 +190,7 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
       
       // Handle new response format
-      const { user: userData, access_token, token_type } = data;
+      const { user: userData, access_token } = data;
       
       // Set authentication state
       setToken(access_token);
@@ -233,7 +234,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     };
     init();
-  }, []);
+  }, [token, fetchProfile, logout]);
 
   const value = useMemo(() => ({
     isAuthenticated,
