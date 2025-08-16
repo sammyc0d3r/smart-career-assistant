@@ -66,21 +66,27 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const userData = await register(formData.username, formData.email, formData.password, selectedField, formData.technicalSkillsPercentage);
-      
+      const userData = await register(
+        formData.username,
+        formData.email,
+        formData.password,
+        selectedField,
+        formData.technicalSkillsPercentage
+      );
+
       // Redirect to dashboard immediately
       navigate('/dashboard', { state: { selectedField, user: userData } });
-      
-      // Submit CV analysis in background if exists
+
+      // Submit CV analysis in background if exists and we have a token
       const pendingAnalysis = sessionStorage.getItem('pendingCvAnalysis');
-      if (pendingAnalysis) {
+      if (pendingAnalysis && userData?.token) {
         try {
           const { fileInfo, relatedFields } = JSON.parse(pendingAnalysis);
-          fetch('https://api.smartcareerassistant.online/auth/cv-analysis', {
+          fetch('https://api.smartcareerassistant.online/cv-analysis', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${userData.token}`
+              Authorization: `Bearer ${userData.token}`
             },
             body: JSON.stringify({
               filename: fileInfo.filename,

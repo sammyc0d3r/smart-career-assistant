@@ -201,15 +201,24 @@ export const AuthProvider = ({ children }) => {
       }
 
       const data = await response.json();
-      
-      // Handle new response format
-      const { user: userData, access_token } = data;
-      
+
+      // New API might not return token/user. Fallback to login when missing
+      let { user: userData, access_token } = data;
+      if (!access_token) {
+        // Attempt to login to obtain token using the email address
+        await login(email, password);
+        access_token = storage.get('token');
+        userData = storage.get('user');
+        // Prefetch jobs after successful login
+        fetchJobs();
+        return { user: userData, token: access_token };
+      }
+
       // Set authentication state
       setToken(access_token);
       setIsAuthenticated(true);
       setUser(userData);
-      
+
       // Store in localStorage
       storage.set('user', userData);
       storage.set('token', access_token);
@@ -218,7 +227,7 @@ export const AuthProvider = ({ children }) => {
       // Start fetching data in background
       fetchProfile();
       fetchJobs();
-      
+
       // Return immediately with needed data
       return {
         user: userData,
@@ -228,7 +237,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Registration error:', error);
       throw error;
     }
-  }, [fetchProfile, fetchJobs]);
+  }, [fetchProfile, fetchJobs, login]);
 
   const logout = useCallback(() => {
     ['isAuthenticated', 'user', 'token'].forEach(key => storage.remove(key));
