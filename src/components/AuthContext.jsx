@@ -205,8 +205,16 @@ export const AuthProvider = ({ children }) => {
       // New API might not return token/user. Fallback to login when missing
       let { user: userData, access_token } = data;
       if (!access_token) {
-        // Attempt to login to obtain token
-        await login(username, password);
+        // Attempt to login to obtain token using email first, then username
+        try {
+          await login(email, password);
+        } catch (emailLoginError) {
+          try {
+            await login(username, password);
+          } catch (usernameLoginError) {
+            throw new Error(usernameLoginError.message || emailLoginError.message || 'Login failed with both email and username');
+          }
+        }
         access_token = storage.get('token');
         userData = storage.get('user');
         // Prefetch jobs after successful login
