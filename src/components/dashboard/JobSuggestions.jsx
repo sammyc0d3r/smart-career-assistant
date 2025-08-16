@@ -9,6 +9,7 @@ const JobSuggestions = () => {
 
   useEffect(() => {
     let isMounted = true;
+    const controller = new AbortController();
 
     const loadJobs = async () => {
       try {
@@ -57,7 +58,8 @@ const JobSuggestions = () => {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Accept': 'application/json'
-          }
+          },
+          signal: controller.signal
         });
 
         const data = await response.json();
@@ -89,8 +91,10 @@ const JobSuggestions = () => {
         }
       } catch (err) {
         if (isMounted) {
-          console.error('Error loading jobs:', err);
-          setError(err.message || 'Failed to load job suggestions');
+          if (err.name !== 'AbortError') {
+            console.error('Error loading jobs:', err);
+            setError(err.message || 'Failed to load job suggestions');
+          }
         }
       } finally {
         if (isMounted) {
@@ -103,6 +107,7 @@ const JobSuggestions = () => {
 
     return () => {
       isMounted = false;
+      controller.abort();
     };
   }, [token, user?.field]);
 
