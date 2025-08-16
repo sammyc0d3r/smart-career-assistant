@@ -12,7 +12,7 @@ const CvAnalysisResults = ({ extractedInfo, relatedFields, filename = 'cv.pdf', 
       if (!token || analysisSubmitted) return;
 
       try {
-        const response = await fetch('http://api.smartcareerassistant.online/auth/cv-analysis', {
+        const response = await fetch('https://api.smartcareerassistant.online/cv-analysis', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
