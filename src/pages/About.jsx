@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import FAQAccordion from '../components/FAQAccordion';
 
 const About = () => {
   const navigate = useNavigate();
