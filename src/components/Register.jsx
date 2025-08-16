@@ -76,7 +76,7 @@ const Register = () => {
       if (pendingAnalysis) {
         try {
           const { fileInfo, relatedFields } = JSON.parse(pendingAnalysis);
-          fetch('https://api.smartcareerassistant.online/auth/cv-analysis', {
+          fetch('https://api.smartcareerassistant.online/cv-analysis', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
