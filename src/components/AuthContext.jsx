@@ -202,11 +202,22 @@ export const AuthProvider = ({ children }) => {
 
       const data = await response.json();
 
-      // New API might not return token/user. Fallback to login when missing
-      let { user: userData, access_token } = data;
+      // New API may return either `access_token` or `token`. Normalize it
+      let { user: userData, access_token, token: altToken } = data;
+      access_token = access_token || altToken;
+
+      // Fallback to login when token is missing
       if (!access_token) {
-        // Attempt to login to obtain token
-        await login(username, password);
+        // Attempt to login to obtain token using email first, then username
+        try {
+          await login(email, password);
+        } catch (emailLoginError) {
+          try {
+            await login(username, password);
+          } catch (usernameLoginError) {
+            throw new Error(usernameLoginError.message || emailLoginError.message || 'Login failed with both email and username');
+          }
+        }
         access_token = storage.get('token');
         userData = storage.get('user');
         // Prefetch jobs after successful login

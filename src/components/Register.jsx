@@ -67,10 +67,14 @@ const Register = () => {
 
     try {
       const userData = await register(formData.username, formData.email, formData.password, selectedField, formData.technicalSkillsPercentage);
-      
-      // Redirect to dashboard immediately
-      navigate('/dashboard', { state: { selectedField, user: userData } });
-      
+
+      if (!userData?.token) {
+        throw new Error('Failed to retrieve authentication token.');
+      }
+
+      // Redirect to dashboard once token is confirmed
+      navigate('/dashboard', { state: { selectedField, user: userData.user } });
+
       // Submit CV analysis in background if exists
       const pendingAnalysis = sessionStorage.getItem('pendingCvAnalysis');
       if (pendingAnalysis) {
