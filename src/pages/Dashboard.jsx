@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, Routes, Route } from 'react-router-dom';
 import { useAuth } from '../components/AuthContext';
 import DashboardHeader from '../components/dashboard/DashboardHeader';
@@ -39,13 +39,21 @@ const Dashboard = () => {
     }
   }, []);
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   if (!user) return null;
 
   return (
     <div className="min-h-screen bg-[var(--background-color)] flex">
-      <Sidebar />
-      <div className="flex-1 ml-64">
-        <DashboardHeader user={user} />
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        ></div>
+      )}
+      <div className="flex-1 ml-0 md:ml-64">
+        <DashboardHeader user={user} onMenuClick={() => setSidebarOpen(true)} />
         <main className="py-6 px-4 sm:px-6 lg:px-8">
           <Routes>
             <Route path="/" element={
