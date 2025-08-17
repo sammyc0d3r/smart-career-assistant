@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
   const currentPath = location.pathname;
 
@@ -82,11 +82,22 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="h-screen w-64 bg-[var(--card-color)] border-r border-gray-200 fixed left-0 top-0">
-      <div className="flex items-center justify-center h-16 border-b border-gray-200">
+    <div
+      className={`fixed inset-y-0 left-0 z-40 h-screen w-64 bg-[var(--card-color)] border-r border-gray-200 transform transition-transform duration-200 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static`}
+    >
+      <div className="flex items-center justify-between h-16 border-b border-gray-200 px-4">
         <span className="text-xl font-bold bg-gradient-to-r from-[var(--primary-color)] to-[var(--secondary-color)] text-transparent bg-clip-text">
           SmartCareerAI
         </span>
+        <button
+          type="button"
+          className="md:hidden text-gray-700 focus:outline-none"
+          onClick={onClose}
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
       <nav className="mt-6">
         <div className="px-4 space-y-1">
