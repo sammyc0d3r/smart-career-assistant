@@ -8,11 +8,13 @@ import React, {
 } from 'react';
 
 const API_URL = 'https://api.smartcareerassistant.online';
-const AUTH_ENDPOINTS = {
+export const AUTH_ENDPOINTS = {
   login: `${API_URL}/auth/login`,
   register: `${API_URL}/auth/register`,
   me: `${API_URL}/auth/me`,
   jobs: `${API_URL}/auth/jobs`,
+  cvAnalysis: `${API_URL}/cv-analysis`,
+  analyze: `${API_URL}/api/analyze`
 };
 
 // Utility functions for localStorage
@@ -165,30 +167,32 @@ export const AuthProvider = ({ children }) => {
 
   const register = useCallback(async (username, email, password, field, technicalSkillsPercentage) => {
     try {
-      const response = await fetch(AUTH_ENDPOINTS.register, {
+      // First, register the user
+      const registerResponse = await fetch(AUTH_ENDPOINTS.register, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify({
           username,
-          email,
+          email: email || `${username}@example.com`, // Provide a default email if none provided
           password,
           field,
           technical_skills_percentage: parseInt(technicalSkillsPercentage)
         })
       });
 
-      if (!response.ok) {
+      if (!registerResponse.ok) {
         let errorMessage = 'Registration failed';
         try {
-          const errorData = await response.json();
-          errorMessage = Array.isArray(errorData.detail)
-            ? errorData.detail.map(err => err.msg).join('\n')
-            : errorData.detail || errorMessage;
-        } catch {
-          // Response might not be JSON (e.g. 500 HTML/error text)
-          const text = await response.text();
+          const errorData = await registerResponse.json();
+          errorMessage = Array.isArray(errorData?.detail)
+            ? errorData.detail.map(err => err.msg || err).join('\n')
+            : errorData?.detail || errorMessage;
+        } catch (e) {
+          // If we can't parse JSON, try to get text
+          const text = await registerResponse.text();
           if (text) errorMessage = text;
         }
 
@@ -200,27 +204,48 @@ export const AuthProvider = ({ children }) => {
         throw new Error(errorMessage);
       }
 
-      const data = await response.json();
+      // After successful registration, log in to get the token
+      const loginData = new URLSearchParams();
+      loginData.append('grant_type', 'password');
+      loginData.append('username', username);
+      loginData.append('password', password);
+      loginData.append('scope', '');
+      loginData.append('client_id', 'string');
+      loginData.append('client_secret', 'string');
 
-      // New API might not return token/user. Fallback to login when missing
-      let { user: userData, access_token } = data;
-      if (!access_token) {
-        // Attempt to login to obtain token using email first, then username
-        try {
-          await login(email, password);
-        } catch (emailLoginError) {
-          try {
-            await login(username, password);
-          } catch (usernameLoginError) {
-            throw new Error(usernameLoginError.message || emailLoginError.message || 'Login failed with both email and username');
-          }
-        }
-        access_token = storage.get('token');
-        userData = storage.get('user');
-        // Prefetch jobs after successful login
-        fetchJobs();
-        return { user: userData, token: access_token };
+      const loginResponse = await fetch(AUTH_ENDPOINTS.login, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json'
+        },
+        body: loginData
+      });
+
+      if (!loginResponse.ok) {
+        throw new Error('Registration successful but failed to log in automatically');
       }
+
+      const loginResult = await loginResponse.json();
+      const access_token = loginResult.access_token;
+      
+      if (!access_token) {
+        throw new Error('No access token received during login');
+      }
+
+      // Get user data using the access token
+      const userResponse = await fetch(AUTH_ENDPOINTS.me, {
+        headers: {
+          'Authorization': `Bearer ${access_token}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!userResponse.ok) {
+        throw new Error('Failed to fetch user data after registration');
+      }
+
+      const userData = await userResponse.json();
 
       // Set authentication state
       setToken(access_token);

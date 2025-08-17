@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { AUTH_ENDPOINTS } from './AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const UploadSection = ({ fileInputRef: externalFileInputRef }) => {
@@ -21,9 +22,12 @@ const UploadSection = ({ fileInputRef: externalFileInputRef }) => {
     formData.append('cv', file);
 
     try {
-      const response = await fetch('https://api.smartcareerassistant.online/api/analyze', {
+      const response = await fetch(AUTH_ENDPOINTS.analyze, {
         method: 'POST',
-        body: formData
+        body: formData,
+        headers: {
+          'Accept': 'application/json'
+        }
       });
 
       if (!response.ok) {

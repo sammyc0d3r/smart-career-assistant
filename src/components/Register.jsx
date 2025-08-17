@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from './AuthContext.jsx';
+import { useAuth, AUTH_ENDPOINTS } from './AuthContext.jsx';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -77,14 +77,15 @@ const Register = () => {
 
       // Submit CV analysis in background if exists
       const pendingAnalysis = sessionStorage.getItem('pendingCvAnalysis');
-      if (pendingAnalysis) {
+      if (pendingAnalysis && userData?.token) {
         try {
           const { fileInfo, relatedFields } = JSON.parse(pendingAnalysis);
-          fetch('https://api.smartcareerassistant.online/cv-analysis', {
+          const response = await fetch(AUTH_ENDPOINTS.cvAnalysis, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${userData.token}`
+              'Authorization': `Bearer ${userData.token}`,
+              'Accept': 'application/json'
             },
             body: JSON.stringify({
               filename: fileInfo.filename,
@@ -95,11 +96,15 @@ const Register = () => {
               processing_time: 2.5,
               error_message: null
             })
-          }).finally(() => {
-            sessionStorage.removeItem('pendingCvAnalysis');
           });
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.error('CV analysis submission failed:', errorData);
+          }
         } catch (error) {
           console.error('Error submitting CV analysis:', error);
+        } finally {
           sessionStorage.removeItem('pendingCvAnalysis');
         }
       }

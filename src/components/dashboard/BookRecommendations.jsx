@@ -27,8 +27,20 @@ const BookRecommendations = () => {
         }
 
         const data = await response.json();
+        console.log('Book recommendations API response:', data);
         
-        setBooks(data.recommendations);
+        // Log each book's structure for debugging
+        if (data.recommendations && Array.isArray(data.recommendations)) {
+          console.log('Books array structure:', data.recommendations.map(book => ({
+            title: book.title,
+            author: book.author,
+            rating: book.rating,
+            url: book.url,
+            description: book.description
+          })));
+        }
+        
+        setBooks(data.recommendations || []);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -84,9 +96,19 @@ const BookRecommendations = () => {
               />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-medium text-gray-900 truncate">{book.book_title}</h3>
-              <p className="text-sm text-gray-500">{book.author}</p>
-              <p className="mt-1 text-sm text-gray-600 line-clamp-2">{book.description}</p>
+              <h3 className="text-lg font-medium text-gray-900 truncate">
+                {book.title || 'No Title Available'}
+                {!book.title && (
+                  <span className="text-red-500 text-xs ml-2">(Debug: No title found)</span>
+                )}
+              </h3>
+              <p className="text-sm text-gray-500">
+                {book.author || 'Author not specified'}
+                {!book.author && <span className="text-red-500 text-xs ml-2">(Debug: No author found)</span>}
+              </p>
+              <p className="mt-1 text-sm text-gray-600 line-clamp-2">
+                {book.description || 'No description available'}
+              </p>
               <div className="mt-2 flex items-center space-x-2">
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                   {book.rating} ⭐
