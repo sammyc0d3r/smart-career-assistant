@@ -190,7 +190,7 @@ export const AuthProvider = ({ children }) => {
           errorMessage = Array.isArray(errorData?.detail)
             ? errorData.detail.map(err => err.msg || err).join('\n')
             : errorData?.detail || errorMessage;
-        } catch (e) {
+        } catch {
           // If we can't parse JSON, try to get text
           const text = await registerResponse.text();
           if (text) errorMessage = text;

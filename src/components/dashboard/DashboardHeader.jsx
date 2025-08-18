@@ -13,7 +13,7 @@ const DashboardHeader = ({ user, onMenuClick }) => {
 
   return (
     <header className="bg-white shadow">
-      <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+      <div className="py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
         <div className="flex items-center">
           <button
             type="button"
