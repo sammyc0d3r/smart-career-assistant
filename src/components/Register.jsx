@@ -53,9 +53,10 @@ const Register = () => {
       return;
     }
 
-    // Password length validation
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
+    // Password complexity validation
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
+    if (!passwordRegex.test(formData.password)) {
+      setError('Password must be at least 8 characters long and include both letters and numbers');
       return;
     }
 
@@ -213,7 +214,9 @@ const Register = () => {
                 value={formData.password}
                 onChange={handleChange}
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                placeholder="Enter password"
+                placeholder="At least 8 characters with letters and numbers"
+                pattern="^(?=.*[A-Za-z])(?=.*\d).{8,}$"
+                title="Password must be at least 8 characters long and include both letters and numbers"
                 required
               />
             </div>
